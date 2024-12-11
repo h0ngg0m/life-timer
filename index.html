@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Life Timer Calculator</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: black;
+            color: lime;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .time-picker {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .time-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .time-set {
+            display: flex;
+            align-items: center;
+            margin-right: 30px;
+        }
+
+        .time-label {
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .time-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .time-box {
+            width: 40px;
+            height: 60px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 2px;
+            text-align: center;
+            font-size: 1.5rem;
+            background-color: #333;
+            border: 2px solid lime;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .separator {
+            margin: 0 5px;
+            font-size: 1.5rem;
+            color: lime;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        #result div {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="time-picker">
+    <div class="time-row">
+        <div class="time-set">
+            <div class="time-label">Born Time:</div>
+            <div class="time-group year">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">-</div>
+            <div class="time-group month">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">-</div>
+            <div class="time-group day">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">T</div>
+            <div class="time-group hour">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">:</div>
+            <div class="time-group minute">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">:</div>
+            <div class="time-group second">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+        </div>
+    </div>
+    <div class="time-row">
+        <div class="time-set">
+            <div class="time-label">Death Time:</div>
+            <div class="time-group year">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">-</div>
+            <div class="time-group month">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">-</div>
+            <div class="time-group day">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">T</div>
+            <div class="time-group hour">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">:</div>
+            <div class="time-group minute">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+            <div class="separator">:</div>
+            <div class="time-group second">
+                <div class="time-box">0</div>
+                <div class="time-box">0</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="result">
+    <div id="months"></div>
+    <div id="days"></div>
+    <div id="hours"></div>
+    <div id="minutes"></div>
+    <div id="seconds"></div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const timeGroups = document.querySelectorAll('.time-group');
+
+        const debounce = (func, delay) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func(...args), delay);
+            };
+        };
+
+        const initializeTime = () => {
+            const now = new Date();
+
+            const adjustDate = (date, years) => {
+                const adjustedDate = new Date(date);
+                adjustedDate.setFullYear(date.getFullYear() + years);
+                return adjustedDate;
+            };
+
+            const formatTimeParts = (date) => {
+                return {
+                    year: date.getFullYear().toString().padStart(4, '0'),
+                    month: (date.getMonth() + 1).toString().padStart(2, '0'),
+                    day: date.getDate().toString().padStart(2, '0'),
+                    hour: date.getHours().toString().padStart(2, '0'),
+                    minute: date.getMinutes().toString().padStart(2, '0'),
+                    second: date.getSeconds().toString().padStart(2, '0'),
+                };
+            };
+
+            const bornTime = formatTimeParts(adjustDate(now, -20));
+            const deathTime = formatTimeParts(adjustDate(now, 10));
+
+            const setTime = (selector, time) => {
+                document.querySelectorAll(`${selector} .year .time-box`).forEach((box, i) => (box.textContent = time.year[i]));
+                document.querySelectorAll(`${selector} .month .time-box`).forEach((box, i) => (box.textContent = time.month[i]));
+                document.querySelectorAll(`${selector} .day .time-box`).forEach((box, i) => (box.textContent = time.day[i]));
+                document.querySelectorAll(`${selector} .hour .time-box`).forEach((box, i) => (box.textContent = time.hour[i]));
+                document.querySelectorAll(`${selector} .minute .time-box`).forEach((box, i) => (box.textContent = time.minute[i]));
+                document.querySelectorAll(`${selector} .second .time-box`).forEach((box, i) => (box.textContent = time.second[i]));
+            };
+
+            setTime('.time-row:nth-of-type(1) .time-set', bornTime);
+            setTime('.time-row:nth-of-type(2) .time-set', deathTime);
+        };
+
+        const calculateRemainingTime = debounce(() => {
+            const getTime = (selector) => {
+                return {
+                    year: Array.from(document.querySelectorAll(`${selector} .year .time-box`)).map(box => box.textContent).join(''),
+                    month: Array.from(document.querySelectorAll(`${selector} .month .time-box`)).map(box => box.textContent).join(''),
+                    day: Array.from(document.querySelectorAll(`${selector} .day .time-box`)).map(box => box.textContent).join(''),
+                    hour: Array.from(document.querySelectorAll(`${selector} .hour .time-box`)).map(box => box.textContent).join(''),
+                    minute: Array.from(document.querySelectorAll(`${selector} .minute .time-box`)).map(box => box.textContent).join(''),
+                    second: Array.from(document.querySelectorAll(`${selector} .second .time-box`)).map(box => box.textContent).join(''),
+                };
+            };
+
+            const bornTime = getTime('.time-row:nth-of-type(1) .time-set');
+            const deathTime = getTime('.time-row:nth-of-type(2) .time-set');
+
+            const birthDate = new Date(`${bornTime.year}-${bornTime.month}-${bornTime.day}T${bornTime.hour}:${bornTime.minute}:${bornTime.second}`);
+            const deathDate = new Date(`${deathTime.year}-${deathTime.month}-${deathTime.day}T${deathTime.hour}:${deathTime.minute}:${deathTime.second}`);
+
+            if (birthDate && deathDate && !isNaN(birthDate.getTime()) && !isNaN(deathDate.getTime())) {
+                const totalSeconds = Math.floor((deathDate - birthDate) / 1000);
+
+                const months = Math.floor(totalSeconds / (30 * 24 * 60 * 60));
+                const days = Math.floor(totalSeconds / (24 * 60 * 60));
+                const hours = Math.floor(totalSeconds / (60 * 60));
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds;
+
+                const formatNumber = (number) => number.toLocaleString();
+
+                document.getElementById('months').textContent = `${formatNumber(months)} months`;
+                document.getElementById('days').textContent = `${formatNumber(days)} days`;
+                document.getElementById('hours').textContent = `${formatNumber(hours)} hours`;
+                document.getElementById('minutes').textContent = `${formatNumber(minutes)} minutes`;
+                document.getElementById('seconds').textContent = `${formatNumber(seconds)} seconds`;
+            }
+        }, 300);
+
+        initializeTime();
+
+        timeGroups.forEach((group) => {
+            const boxes = group.querySelectorAll('.time-box');
+            boxes.forEach((box) => {
+                let currentValue = parseInt(box.textContent, 10);
+                box.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (isNaN(currentValue)) currentValue = 0;
+
+                    // Modify the sensitivity of scrolling
+                    if (e.deltaY > 0) {
+                        currentValue += 1;
+                    } else if (e.deltaY < 0) {
+                        currentValue -= 1;
+                    }
+
+                    if (currentValue > 9) currentValue = 0;
+                    if (currentValue < 0) currentValue = 9;
+
+                    box.textContent = currentValue;
+                    calculateRemainingTime(); // Update remaining time
+                });
+            });
+        });
+
+
+        calculateRemainingTime();
+    });
+</script>
+</body>
+</html>
